@@ -1,3 +1,5 @@
+//code tested with the lastest Firefox build's developer console
+
 //question 1.1
 const first_name = "John";
 const last_name = "Javascript";
