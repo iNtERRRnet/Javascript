@@ -1,48 +1,59 @@
-const container = document.getElementById("product-container");
+const container = document.getElementById("weather-container");
 
-const allBtn = document.getElementById("btn-all");
-const laptopBtn = document.getElementById("btn-laptops");
-const accessoryBtn = document.getElementById("btn-accessories");
+const data = [];
+const url = new URL("https://archive-api.open-meteo.com/v1/archive");
+const params = new URLSearchParams
+([
+    ["latitude", "56.796103"],
+    ["longitude", "24.624937"],
+    ["start_date", "2020-01-01"], 
+    ["end_date", "2020-01-01"], 
+    ["hourly", "temperature_2m,precipitation,wind_speed_10m"]
+]);
 
-const products = 
-[
-  { id: 1, name: "Pro Laptop", price: 1200, category: "laptops", inStock: true },
-  { id: 2, name: "Wireless Mouse", price: 45, category: "accessories", inStock: true },
-  { id: 3, name: "Mechanical Keyboard", price: 150, category: "accessories", inStock: false },
-  { id: 4, name: "Budget Laptop", price: 600, category: "laptops", inStock: true },
-  { id: 5, name: "USB-C Hub", price: 30, category: "accessories", inStock: true },
-];
+url.search = new URLSearchParams(params);
+fetch(url)
+    .then(response => response.json())
+    .then(jsonData => 
+    {
+        console.log(jsonData);
+        data = jsonData;
+        createTable();
+    })
+    .catch(error => 
+    {
+        console.error("Error fetching data:", error);
+    });
 
-function renderProducts(items)
+
+//https://www.geeksforgeeks.org/javascript/how-to-convert-json-data-to-a-html-table-using-javascript-jquery/
+function createTable() 
 {
     container.innerHTML = "";
 
-    const productCards = items.map(item => `
-        <div class="${item.inStock ? 'product-card' : 'out-of-stock'}">
-            <h3>${item.name}</h3>
-            <p>${item.inStock ? item.price: 'Out of Stock'}</p>
-            <p>${item.category}</p>
-        </div>
-        `).join('');
+    const columns = Object.keys(data[0]);
+    const table = document.createElement("table");
+    const headerRow = table.insertRow();
 
-    container.innerHTML = productCards;
+    columns.forEach(column => 
+    {
+        const th = document.createElement("th");
+        th.textContent = column;
+        headerRow.appendChild(th);
+    });
+
+    data.forEach(item => 
+    {
+        const row = table.insertRow();
+
+        columns.forEach(column => 
+        {
+            const cell = row.insertCell();
+            cell.textContent = item[column] ?? "";
+        });
+    });
+
+    container.appendChild(table);
 }
 
-allBtn.addEventListener("click", () => 
-{
-    renderProducts(products);
-});
-
-laptopBtn.addEventListener("click", () => 
-{
-    const laptops = products.filter(product => product.category === "laptops");
-    renderProducts(laptops);
-});
-
-accessoryBtn.addEventListener("click", () => 
-{
-    const accessories = products.filter(accessory => accessory.category === "accessories");
-    renderProducts(accessories);
-});
-
-renderProducts(products);
+createTable();
