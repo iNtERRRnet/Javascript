@@ -6,7 +6,7 @@ const params = new URLSearchParams
     ["latitude", "56.796103"],
     ["longitude", "24.624937"],
     ["start_date", "2020-01-01"], 
-    ["end_date", "2020-01-01"], 
+    ["end_date", "2020-01-07"], 
     ["hourly", "temperature_2m,precipitation,wind_speed_10m"],
     ["wind_speed_unit", "ms"]
 ]);
@@ -22,7 +22,7 @@ async function loadData()
     } 
     catch(error) 
     { 
-        console.error("Error fetching data:", error); 
+        console.error(error); 
     } 
 }
 
@@ -32,7 +32,6 @@ function createTable(data)
 
     const columns = Object.keys(data.hourly);
     const rowCount = data.hourly[columns[0]].length;
-    const rowUnits = data.hourly_units;
 
     const table = document.createElement("table");
     const headerRow = table.insertRow();
@@ -40,22 +39,47 @@ function createTable(data)
     columns.forEach(column => 
     {
         const th = document.createElement("th");
+
+        if(column == "time")
+        {
+            column = "Time";
+        }
+        else if(column == "temperature_2m")
+        {
+            column = "Temperature, " + data.hourly_units.temperature_2m;
+        }
+        else if(column == "precipitation")
+        {
+            column = "Precipitation, " + data.hourly_units.precipitation;
+        }
+        else if(column == "wind_speed_10m")
+        {
+            column = "Wind Speed, " + data.hourly_units.wind_speed_10m;
+        }
+
         th.textContent = column;
         headerRow.appendChild(th);
     });
 
-    for(let i = 1; i < rowCount; i++) 
+    for(let i = 0; i < rowCount; i++) 
     {
-        const row = table.insertRow();
+        const time = data.hourly.time[i];
 
-        columns.forEach(column => 
+        if(time.includes("00:00") || time.includes("06:00") || time.includes("12:00") || time.includes("18:00"))
         {
-            const cell = row.insertCell();
-            //if(data.hourly[column][i] == "")
-            //{
+            const row = table.insertRow();
+
+            columns.forEach(column => 
+            {
+                const cell = row.insertCell();
                 cell.textContent = data.hourly[column][i] ?? "";
-            //}
-        });
+
+                if(time.includes("18:00"))
+                {
+                    table.insertRow();
+                }
+            });
+        }
     }
 
     container.appendChild(table);
