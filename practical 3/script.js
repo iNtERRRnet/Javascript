@@ -1,29 +1,30 @@
+const date = new Date();
+
 const container = document.getElementById("weather-container");
+const submitButton = document.getElementById("submitButton");
+const latitude = document.getElementById("latitude");
+const longitude = document.getElementById("longitude");
+const startDate = document.getElementById("startDate");
+const endDate = document.getElementById("endDate");
 
 const url = new URL("https://archive-api.open-meteo.com/v1/archive");
-const params = new URLSearchParams
-([
-    ["latitude", "56.796103"],
-    ["longitude", "24.624937"],
-    ["start_date", "2020-01-01"], 
-    ["end_date", "2020-01-07"], 
-    ["hourly", "temperature_2m,precipitation,wind_speed_10m"],
-    ["wind_speed_unit", "ms"]
-]);
 
-url.search = new URLSearchParams(params);
-async function loadData() 
-{ 
-    try 
-    { 
-        const response = await fetch(url); 
-        const data = await response.json(); 
-        createTable(data); 
-    } 
-    catch(error) 
-    { 
-        console.error(error); 
-    } 
+function fetchWeather()
+{
+    const params = new URLSearchParams
+    ([
+        ["latitude", latitude.value.trim()],
+        ["longitude", longitude.value.trim()],
+        ["start_date", startDate.value], 
+        ["end_date", endDate.value], 
+        ["hourly", "temperature_2m,precipitation,wind_speed_10m"],
+        ["wind_speed_unit", "ms"]
+    ]);
+    url.search = new URLSearchParams(params);
+
+    fetch(url)
+        .then(resp => resp.json())
+        .then(createTable)
 }
 
 function createTable(data) 
@@ -85,4 +86,7 @@ function createTable(data)
     container.appendChild(table);
 }
 
-loadData();
+submitButton.addEventListener("click", () =>
+{
+    fetchWeather();
+});
