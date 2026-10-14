@@ -1,5 +1,3 @@
-const date = new Date();
-
 const container = document.getElementById("weather-container");
 const submitButton = document.getElementById("submitButton");
 const latitude = document.getElementById("latitude");
